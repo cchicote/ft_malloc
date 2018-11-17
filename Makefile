@@ -1,33 +1,64 @@
-NAME = ft_malloc
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: cchicote <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2018/10/11 16:29:33 by cchicote          #+#    #+#              #
+#    Updated: 2018/10/11 16:29:36 by cchicote         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-CC = gcc
+NAME 			= ft_malloc
 
-CFLAGS = -Wall -Werror -Wextra
+CC 				= gcc
+CFLAGS 			= -Wall -Wextra -g #-Werror
+LFLAGS 			= -lft
+INC 			= -I$(INCLUDE_PATH)
 
-INCLUDE_PATH = ./includes
+INCLUDE_PATH 	= ./includes
+LIBFT_PATH 		= ./libft
+SRC_PATH 		= ./src/
+OBJ_PATH 		= ./obj/
 
-LIBFT_PATH = ./libft
+SRCS 			= ft_malloc.c \
+					ft_free.c \
+					ft_realloc.c \
+					zones.c \
+					main.c
+OBJS 			= $(SRCS:.c=.o)
 
-SRC_PATH = ./src/
+SRC 			= $(addprefix $(SRC_PATH), $(SRCS))
+OBJ 			= $(addprefix $(OBJ_PATH), $(OBJS))
+LIBFT 			= $(LIBFT_PATH)/libft.a
 
-SRCS = malloc.c \
 
-SRC = $(addprefix $(SRC_PATH), $(SRCS))
 
-all:
+all: $(NAME)
+
+$(LIBFT):
 	@ echo "Compiling libft"
 	@ make -sC $(LIBFT_PATH)
 
-malloc:
-	@ make -sC $(LIBFT_PATH)
-	@ $(CC) $(CFLAGS) $(SRC) -I$(INCLUDE_PATH) -o ft_malloc -L ./libft/ -lft 
-	@ ./ft_malloc
+$(NAME): $(LIBFT) $(OBJ)
+	@ echo "Compiling executable"
+	@ $(CC) $(CFLAGS) $(OBJ) -L $(LIBFT_PATH) $(LFLAGS) -o $@
+
+$(OBJ_PATH)%.o: $(SRC_PATH)%.c
+	@ echo "Compiling objects"
+	@ mkdir -p $(OBJ_PATH)
+	@ $(CC) $(CFLAGS) $(INC) -o $@ -c $<
 
 clean:
+	@ echo "Cleaning .o files"
+	@ /bin/rm -Rf $(OBJ_PATH)
 	@ echo "Cleaning libft"
 	@ make clean -sC $(LIBFT_PATH)
 
-fclean:
+fclean: clean
+	@ echo "Cleaning $(NAME)"
+	@ /bin/rm -f $(NAME)
 	@ echo "Fcleaning libft"
 	@ make fclean -sC $(LIBFT_PATH)
 
