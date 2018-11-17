@@ -15,23 +15,25 @@
 void		*ft_malloc(size_t size)
 {
 	void	*ptr;
+	t_zone	*zone;
 
 	ptr = NULL;
+	zone = NULL;
 	if (!size)
 		return (ptr);
-	if (size <= N)
+	if (size <= (size_t)TINY_MAX)
 	{
-		// TINY ZONE
+		printf("TINY %zu\n", new_zone(size, TINY)->size);
 	}
-	else if (size <= M)
+	else if (size <= (size_t)SMALL_MAX)
 	{
-		// SMALL ZONE
+		printf("SMALL %zu\n", new_zone(size, SMALL)->size);
 	}
-	else if (size > M)
+	else if (size > (size_t)SMALL_MAX)
 	{
-		// LARGE ZONE
+		printf("LARGE %zu\n", new_zone(size, LARGE)->size);
 	}
-
+	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE,
+				MAP_ANON | MAP_PRIVATE, -1, 0);
 	return (ptr);
 }
-

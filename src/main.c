@@ -14,11 +14,38 @@
 
 int		main(void)
 {
-	char *str;
+	char	*str;
+	t_zone	*tmp;
 
 	str = (char*)ft_malloc(sizeof(char) * 100);
-	if (!str)
-		printf("ERROR\n");
-	munmap(str, sizeof(str));
+	str = ft_strcpy(str, ft_strdup("HAHAHAHA"));
+	printf("%s\n", str);
+	munmap(str, sizeof(char) * 100);
+	str = (char*)ft_malloc(sizeof(char) * 321);
+	str = ft_strcpy(str, ft_strdup("HAHAHAHA"));
+	printf("%s\n", str);
+	munmap(str, sizeof(char) * 321);
+	str = (char*)ft_malloc(sizeof(char) * 12);
+	str = ft_strcpy(str, ft_strdup("HAHAHAHA"));
+	printf("%s\n", str);
+	munmap(str, sizeof(char) * 12);
+
+	str = (char*)ft_malloc(TINY_MAX + 1);
+	str = ft_strcpy(str, ft_strdup("HAHAHAHA"));
+	printf("%s\n", str);
+	munmap(str, TINY_MAX + 1);
+
+	str = (char*)ft_malloc(SMALL_MAX + 1);
+	str = ft_strcpy(str, ft_strdup("HAHAHAHA"));
+	printf("%s\n", str);
+	munmap(str, SMALL_MAX + 1);
+
+	tmp = g_saved_data.tiny_head;
+	while (tmp)
+	{
+		printf("TINY: %zu\n", tmp->size);
+		tmp = tmp->next;
+	}
+
 	return (0);
 }

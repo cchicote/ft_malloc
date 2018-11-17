@@ -20,10 +20,10 @@
 # include <sys/mman.h>
 
 # define TRUE 1
-# define FALSE 0 
+# define FALSE 0
 
 /*
-** CODE DE DIMENSION DES ZONES 
+** CODE DE DIMENSION DES ZONES
 */
 
 # define TINY 1
@@ -39,39 +39,41 @@
 # define TINY_MAX (8 * getpagesize())
 # define SMALL_MAX (32 * getpagesize())
 
-typedef struct 		s_zone
+typedef struct		s_zone
 {
+	int				type;
 	size_t			size;
-	struct s_bucket	*next;
+	struct s_zone	*next;
 }					t_zone;
 
-typedef struct 		s_global
+typedef struct		s_global
 {
 	t_zone			*tiny_head;
 	t_zone			*small_head;
 	t_zone			*large_head;
 }					t_global;
 
-extern t_global		*g_saved_date;
+extern t_global		g_saved_data;
 
 /*
 **			FT_MALLOC.C
 */
-void		*ft_malloc(size_t size);
+void				*ft_malloc(size_t size);
 
 /*
 **			FT_FREE.C
 */
-void 		ft_free(void *ptr);
+void				ft_free(void *ptr);
 
 /*
 **			FT_REALLOC.C
 */
-void 		*ft_realloc(void *ptr, size_t size);
+void				*ft_realloc(void *ptr, size_t size);
 
 /*
 **			ZONES.C
 */
 
+t_zone				*new_zone(size_t size, int type);
 
 #endif
