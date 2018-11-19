@@ -25,7 +25,7 @@ OBJ_PATH 		= ./obj/
 SRCS 			= ft_malloc.c \
 					ft_free.c \
 					ft_realloc.c \
-					zones.c \
+					buckets.c \
 					main.c
 OBJS 			= $(SRCS:.c=.o)
 

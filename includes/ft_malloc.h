@@ -31,26 +31,30 @@
 # define LARGE 3
 
 /*
-** TAILLE MAXIMALE DES ZONES
+** TAILLE MAXIMALE DES CHUNKS
 ** N -> TINY
 ** M -> SMALL
 */
 
-# define TINY_MAX (8 * getpagesize())
+# define TINY_MAX 1
 # define SMALL_MAX (32 * getpagesize())
 
-typedef struct		s_zone
+typedef struct		s_bucket
 {
-	int				type;
+	int				dimension;
+	size_t			bucket_total_size;
+	size_t			total_size;
+	size_t			available;
+	size_t			allocated;
 	size_t			size;
-	struct s_zone	*next;
-}					t_zone;
+	struct s_bucket	*next;
+}					t_bucket;
 
 typedef struct		s_global
 {
-	t_zone			*tiny_head;
-	t_zone			*small_head;
-	t_zone			*large_head;
+	t_bucket		*tiny;
+	t_bucket		*small;
+	t_bucket		*large;
 }					t_global;
 
 extern t_global		g_saved_data;
@@ -71,9 +75,9 @@ void				ft_free(void *ptr);
 void				*ft_realloc(void *ptr, size_t size);
 
 /*
-**			ZONES.C
+**			BUCKETS.C
 */
 
-t_zone				*new_zone(size_t size, int type);
+t_bucket		*new_bucket(t_bucket **head, int dimension, size_t total_size);
 
 #endif

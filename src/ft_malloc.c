@@ -14,26 +14,21 @@
 
 void		*ft_malloc(size_t size)
 {
-	void	*ptr;
-	t_zone	*zone;
+	t_bucket *bucket;
 
-	ptr = NULL;
-	zone = NULL;
+	bucket = NULL;
 	if (!size)
-		return (ptr);
-	if (size <= (size_t)TINY_MAX)
+		return (NULL);
+	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(size, g_saved_data.tiny)))
 	{
-		printf("TINY %zu\n", new_zone(size, TINY)->size);
+		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX * 100);
 	}
-	else if (size <= (size_t)SMALL_MAX)
+	else if (size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(size, g_saved_data.small)))
 	{
-		printf("SMALL %zu\n", new_zone(size, SMALL)->size);
 	}
 	else if (size > (size_t)SMALL_MAX)
 	{
-		printf("LARGE %zu\n", new_zone(size, LARGE)->size);
 	}
-	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE,
-				MAP_ANON | MAP_PRIVATE, -1, 0);
-	return (ptr);
+	allocate_memory(bucket, size);
+	return ((void*)bucket);
 }
