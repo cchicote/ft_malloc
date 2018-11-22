@@ -22,6 +22,10 @@
 # define TRUE 1
 # define FALSE 0
 
+# define NEW 1
+# define RETRIEVED 2
+# define STANDARD 3
+
 /*
 ** CODE DE DIMENSION DES ZONES
 */
@@ -49,11 +53,9 @@ typedef struct 		s_chunk
 
 typedef struct		s_bucket
 {
-	int				dimension;
-	size_t			bucket_total_size;
-	size_t			total_size;
-	size_t			available;
+	size_t			allocatable;
 	size_t			allocated;
+	int				dimension;
 	t_chunk			*chunks;
 	struct s_bucket	*next;
 }					t_bucket;
@@ -70,26 +72,37 @@ typedef struct		s_global
 extern t_global		g_saved_data;
 
 /*
-**			FT_MALLOC.C
+**					FT_MALLOC.C
 */
 void				*ft_malloc(size_t size);
 
 /*
-**			FT_FREE.C
+**					FT_FREE.C
 */
 void				ft_free(void *ptr);
 
 /*
-**			FT_REALLOC.C
+**					FT_REALLOC.C
 */
 void				*ft_realloc(void *ptr, size_t size);
 
 /*
-**			BUCKETS.C
-*/
+**					BUCKETS.C
+*/	
+	
+t_bucket			*new_bucket(t_bucket **head, int dimension, size_t chunk_size);
+t_bucket			*retrieve_bucket(size_t size, t_bucket *head);
+t_bucket			*new_large_bucket(t_bucket **head, int dimension, size_t chunk_size);
 
-t_bucket		*new_bucket(t_bucket **head, int dimension, size_t total_size);
-t_bucket		*retrieve_bucket(size_t size, t_bucket *head);
+	
+/*
+**					UTILS.C
+*/
+void				print_bucket_specs(t_bucket *bucket, int code);
+void				print_chunk_specs(t_chunk *chunk);
+size_t				available(t_bucket *b);
+void				add_bucket_to_buckets(t_bucket **head, t_bucket *bucket);
+void				add_chunk_to_chunks(t_chunk **head, t_chunk *chunk);
 
 
 

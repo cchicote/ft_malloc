@@ -12,37 +12,20 @@
 
 #include "ft_malloc.h"
 
-void		push_to_end2(t_chunk **head, t_chunk *elem)
+
+t_chunk		*allocate_memory(void **b, size_t size)
 {
-	t_chunk *tmp;
+	t_chunk		*chunk;
+	t_bucket	*bucket;
 
-	tmp = *head;
-	if (!tmp)
-	{
-		*head = elem;
-		return ;
-	}
-	while (tmp->next)
-	{
-		tmp = tmp->next;
-	}
-	tmp->next = elem;
-}
-
-t_chunk		*allocate_memory(void **bucket, size_t size)
-{
-	t_chunk 	*chunk;
-	t_bucket	*b;
-
-	b = (t_bucket*)*bucket;
-	b->available -= size + sizeof(t_chunk);
-	b->allocated += size + sizeof(t_chunk);
-	chunk = (t_chunk*)(b + sizeof(t_bucket) + b->allocated);
+	bucket = (t_bucket*)*b;
+	chunk = (t_chunk*)(*b + bucket->allocated);
+	bucket->allocated += sizeof(t_chunk) + size;
 	chunk->size = size;
 	chunk->is_free = FALSE;
-	chunk->mem = (void*)(chunk + sizeof(t_chunk));
+	chunk->mem = (void*)((void*)chunk + sizeof(t_chunk));
 	chunk->next = NULL;
-	push_to_end2(&b->chunks, chunk);
+	add_chunk_to_chunks(&bucket->chunks, chunk);
 	return (chunk);
 }
 
@@ -56,11 +39,11 @@ void		*ft_malloc(size_t size)
 	if (!size)
 		return (NULL);
 	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(size, g_saved_data.tiny)))
-		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX * 100);
+		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX);
 	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(size, g_saved_data.small)))
-		bucket = new_bucket(&(g_saved_data.small), SMALL, SMALL_MAX * 100);
+		bucket = new_bucket(&(g_saved_data.small), SMALL, SMALL_MAX);
 	else if (size > (size_t)SMALL_MAX)
-		bucket = new_bucket(&(g_saved_data.large), LARGE, size);
+		bucket = new_large_bucket(&(g_saved_data.large), LARGE, size);
 	ret = allocate_memory((void**)&bucket, size);
 	return (ret->mem);
 }

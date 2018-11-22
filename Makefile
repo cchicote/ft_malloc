@@ -26,6 +26,7 @@ SRCS 			= ft_malloc.c \
 					ft_free.c \
 					ft_realloc.c \
 					buckets.c \
+					utils.c \
 					main.c
 OBJS 			= $(SRCS:.c=.o)
 

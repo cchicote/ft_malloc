@@ -12,52 +12,55 @@
 
 #include "ft_malloc.h"
 
-void	print_chunks(t_bucket *b)
+void	print_all_data(void)
 {
-	t_chunk *tmp;
+	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small, g_saved_data.large};
+	t_bucket	*b;
+	t_chunk		*c;
+	int			i;
 
-	tmp = b->chunks;
-	while (tmp)
+	i = 0;
+	while (i < 3)
 	{
-		printf("Address: %p\n", tmp->mem);
-		tmp = tmp->next;
+		b = tab[i];
+		while (b)
+		{
+			print_bucket_specs(b, STANDARD);
+			c = b->chunks;
+			while (c)
+			{
+				print_chunk_specs(c);
+				c = c->next;
+			}
+			b = b->next;
+		}
+		i++;
 	}
 }
 
 int		main()
 {
-	char		*str;
-	t_bucket	*tmp;
+	//ft_malloc(100000000000000);
+	//malloc(100000000000000);
+	/*int i;
 
-	/*int i = 0;
-	while (i < 10)
+	i = 0;
+	while (i < 200000)
 	{
-		str = (char*)ft_malloc(100 * i);
-		i += 10;
+		malloc(100000);
+		i++;
 	}*/
+	void *z;
 
-	str = (char*)ft_malloc(1); 
-	str = (char*)ft_malloc(1); 
-	str = (char*)ft_malloc(1);
-	tmp = g_saved_data.tiny;
-	while (tmp)
-	{
-		printf("TINY: %zu/%zu\n", tmp->allocated, tmp->total_size);
-		print_chunks(tmp);
-		tmp = tmp->next;
-	}
-	tmp = g_saved_data.small;
-	while (tmp)
-	{
-		printf("SMALL: %zu/%zu\n", tmp->allocated, tmp->total_size);
-		tmp = tmp->next;
-	}
-	tmp = g_saved_data.large;
-	while (tmp)
-	{
-		printf("LARGE: %zu/%zu\n", tmp->allocated, tmp->total_size);
-		tmp = tmp->next;
-	}
-
+	ft_malloc(100);
+	ft_malloc(100);
+	ft_malloc(100);
+	z = ft_malloc(100);
+	ft_malloc(100);
+	ft_malloc(100);
+	printf("%p\n", z);
+	//print_all_data();
+	ft_free(z);
+	//print_all_data();
 	return (0);
 }

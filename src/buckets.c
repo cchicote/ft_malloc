@@ -11,62 +11,51 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-# define NEW 1
-# define RETRIEVED 2
 
-t_global 	g_saved_data;
+t_global 		g_saved_data;
 
-void		print_bucket_specs(t_bucket *bucket, int code)
-{
-	if (code == NEW)
-		printf("\e[32mNew bucket:\n\tDimension: [%s]\n\tAllocatable space total size: [%zu]\n\tBucket total size: [%zu]\n\tAllocated space: [%zu]\n\tAvailable space: [%zu]\e[0m\n", (bucket->dimension == TINY ? "Tiny" : (bucket->dimension == SMALL ? "Small" : "Large")), bucket->total_size, bucket->bucket_total_size, bucket->allocated, bucket->available);
-	else if (code == RETRIEVED)
-		printf("\e[33mRetrieved bucket:\n\tDimension: [%s]\n\tAllocatable space total size: [%zu]\n\tBucket total size: [%zu]\n\tAllocated space: [%zu]\n\tAvailable space: [%zu]\e[0m\n", (bucket->dimension == TINY ? "Tiny" : (bucket->dimension == SMALL ? "Small" : "Large")), bucket->total_size, bucket->bucket_total_size, bucket->allocated, bucket->available);
-
-}
-
-t_bucket	*retrieve_bucket(size_t size, t_bucket *head)
+t_bucket		*retrieve_bucket(size_t size, t_bucket *head)
 {
 	t_bucket *tmp;
 
 	tmp = head;
-	while (tmp && size > tmp->available)
+	while (tmp && size > available(tmp))
 		tmp = tmp->next;
-	if (tmp)
-		print_bucket_specs(tmp, RETRIEVED);
 	return (tmp);
 }
 
-void		push_to_end(t_bucket **head, t_bucket *elem)
+t_bucket		*new_large_bucket(t_bucket **head, int dimension, size_t chunk_size)
 {
-	t_bucket *tmp;
+	t_bucket	*new;
+	size_t		bucket_size;
 
-	tmp = *head;
-	if (!tmp)
-	{
-		*head = elem;
-		return ;
-	}
-	while (tmp->next)
-	{
-		tmp = tmp->next;
-	}
-	tmp->next = elem;
-}
+	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size);
 
-t_bucket		*new_bucket(t_bucket **head, int dimension, size_t total_size)
-{
-	t_bucket *new;
+	new = (t_bucket*)mmap(NULL, bucket_size, 
+			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
-	new = (t_bucket*)mmap(NULL, total_size, PROT_READ | PROT_WRITE,
-			MAP_ANON | MAP_PRIVATE, -1, 0);	
-	new->bucket_total_size = total_size + sizeof(t_bucket);
-	new->total_size = total_size;
-	new->available = total_size;
-	new->allocated = 0;
 	new->dimension = dimension;
-	new->next = NULL;
-	push_to_end(head, new);
-	print_bucket_specs(new, NEW);
+	new->allocatable = bucket_size;
+	new->allocated = sizeof(t_bucket);
+	add_bucket_to_buckets(head, new);
 	return (new);
 }
+
+t_bucket		*new_bucket(t_bucket **head, int dimension, size_t chunk_size)
+{
+	t_bucket	*new;
+	size_t		bucket_size;
+
+	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size) * 100;
+	bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
+
+	new = (t_bucket*)mmap(NULL, bucket_size, 
+			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+
+	new->dimension = dimension;
+	new->allocatable = bucket_size;
+	new->allocated = sizeof(t_bucket);
+	add_bucket_to_buckets(head, new);
+	return (new);
+}
+
