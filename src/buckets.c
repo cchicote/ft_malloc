@@ -19,9 +19,9 @@ t_global 	g_saved_data;
 void		print_bucket_specs(t_bucket *bucket, int code)
 {
 	if (code == NEW)
-		printf("\e[32mNew bucket:\n\tDimension: [%s]\n\tAllocatable space total size: [%zu]\n\tBucket total size: [%zu]\n\tAllocated space: [%zu]\nAvailable space: [%zu]\e[0m\n", (bucket->dimension == TINY ? "Tiny" : (bucket->dimension == SMALL ? "Small" : "Large")), bucket->total_size, bucket->bucket_total_size, bucket->allocated, bucket->available);
+		printf("\e[32mNew bucket:\n\tDimension: [%s]\n\tAllocatable space total size: [%zu]\n\tBucket total size: [%zu]\n\tAllocated space: [%zu]\n\tAvailable space: [%zu]\e[0m\n", (bucket->dimension == TINY ? "Tiny" : (bucket->dimension == SMALL ? "Small" : "Large")), bucket->total_size, bucket->bucket_total_size, bucket->allocated, bucket->available);
 	else if (code == RETRIEVED)
-		printf("\e[33mRetrieved bucket:\n\tDimension: [%s]\n\tAllocatable space total size: [%zu]\n\tBucket total size: [%zu]\n\tAllocated space: [%zu]\nAvailable space: [%zu]\e[0m\n", (bucket->dimension == TINY ? "Tiny" : (bucket->dimension == SMALL ? "Small" : "Large")), bucket->total_size, bucket->bucket_total_size, bucket->allocated, bucket->available);
+		printf("\e[33mRetrieved bucket:\n\tDimension: [%s]\n\tAllocatable space total size: [%zu]\n\tBucket total size: [%zu]\n\tAllocated space: [%zu]\n\tAvailable space: [%zu]\e[0m\n", (bucket->dimension == TINY ? "Tiny" : (bucket->dimension == SMALL ? "Small" : "Large")), bucket->total_size, bucket->bucket_total_size, bucket->allocated, bucket->available);
 
 }
 
@@ -58,7 +58,7 @@ t_bucket		*new_bucket(t_bucket **head, int dimension, size_t total_size)
 {
 	t_bucket *new;
 
-	new = (t_bucket*)mmap(NULL, sizeof(t_bucket) + total_size, PROT_READ | PROT_WRITE,
+	new = (t_bucket*)mmap(NULL, total_size, PROT_READ | PROT_WRITE,
 			MAP_ANON | MAP_PRIVATE, -1, 0);	
 	new->bucket_total_size = total_size + sizeof(t_bucket);
 	new->total_size = total_size;
