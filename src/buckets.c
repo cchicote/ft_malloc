@@ -31,7 +31,6 @@ void			free_bucket(t_bucket *b)
 {
 	t_bucket *tmp;
 
-	printf("On free le bucket\n");
 	tmp = b->dimension == TINY ? g_saved_data.tiny : (b->dimension == SMALL ? g_saved_data.small : g_saved_data.large);
 	while (tmp && tmp->next != b)
 		tmp = tmp->next;
@@ -44,7 +43,7 @@ t_bucket		*new_bucket(t_bucket **head, int dimension, size_t chunk_size)
 {
 	t_bucket	*new;
 	size_t		bucket_size;
-
+	
 	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size) * 100;
 	bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
 	

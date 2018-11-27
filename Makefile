@@ -34,8 +34,6 @@ SRC 			= $(addprefix $(SRC_PATH), $(SRCS))
 OBJ 			= $(addprefix $(OBJ_PATH), $(OBJS))
 LIBFT 			= $(LIBFT_PATH)/libft.a
 
-
-
 all: $(NAME)
 
 $(LIBFT):

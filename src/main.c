@@ -30,7 +30,7 @@ void	print_all_data(void)
 		while (b)
 		{
 			total_buckets++;
-			//print_bucket_specs(b, STANDARD);
+			print_bucket_specs(b, STANDARD);
 			c = b->chunks;
 			while (c)
 			{
