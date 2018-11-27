@@ -53,15 +53,12 @@ typedef struct 		s_chunk
 
 typedef struct		s_bucket
 {
-	size_t			total_size;
-	size_t			offset;
+	size_t			allocated;
+	size_t			allocatable;
 	int				dimension;
-	int				chunks_allocated;
 	t_chunk			*chunks;
 	struct s_bucket	*next;
 }					t_bucket;
-
-
 
 typedef struct		s_global
 {
@@ -76,6 +73,7 @@ extern t_global		g_saved_data;
 **					FT_MALLOC.C
 */
 void				*ft_malloc(size_t size);
+t_chunk				*find_free_chunk(t_bucket *b, size_t size);
 
 /*
 **					FT_FREE.C
@@ -92,10 +90,10 @@ void				*ft_realloc(void *ptr, size_t size);
 */	
 	
 t_bucket			*new_bucket(t_bucket **head, int dimension, size_t chunk_size);
-t_bucket			*retrieve_bucket(t_bucket *head);
+t_bucket			*retrieve_bucket(t_bucket *head, size_t size);
 t_bucket			*new_large_bucket(t_bucket **head, int dimension, size_t chunk_size);
+void				free_bucket(t_bucket *b);
 
-	
 /*
 **					UTILS.C
 */

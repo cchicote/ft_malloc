@@ -11,17 +11,16 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-#include <errno.h>
 
-t_chunk		*get_chunk(void *ptr)
+t_bucket		*get_bucket(void *ptr)
 {
 	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small, g_saved_data.large};
 	t_bucket	*b;
 	t_chunk		*c;
 	int			i;
 
-	i = 0;
-	while (i < 3)
+	i = -1;
+	while (++i < 3)
 	{
 		b = tab[i];
 		while (b)
@@ -30,28 +29,48 @@ t_chunk		*get_chunk(void *ptr)
 			while (c)
 			{
 				if (c->mem == ptr)
-					return (c);
+				{
+					b->allocated -= c->size - sizeof(t_chunk);
+					c->is_free = TRUE;
+					return (b);
+				}
 				c = c->next;
 			}
 			b = b->next;
 		}
-		i++;
 	}
 	return (NULL);
 }
 
+int			is_bucket_to_free(t_bucket *b)
+{
+	t_chunk	*tmp;
+	
+	if (b == g_saved_data.tiny || b == g_saved_data.small || b == g_saved_data.large)
+		return (FALSE);
+	tmp = b->chunks;
+	while (tmp)
+	{
+		if (!tmp->is_free)
+			return (FALSE);
+		tmp = tmp->next;
+	}
+	return (TRUE);
+}
+
 void		ft_free(void *ptr)
 {
-	t_chunk *c;
+	t_bucket *b;
 
 	if (!ptr)
 		return ;
-	if (!(c = get_chunk(ptr)))
+	if (!(b = get_bucket(ptr)))
 	{
 		printf("WTF\n");
 		return ;
 	}
-	if (munmap(c->mem, c->size) == -1)
-		printf("ERROR: Value of errno: %d\n", errno); 
-	c->is_free = TRUE;
+	if (is_bucket_to_free(b))
+	{
+		free_bucket(b);
+	}
 }

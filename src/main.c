@@ -17,30 +17,37 @@ void	print_all_data(void)
 	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small, g_saved_data.large};
 	t_bucket	*b;
 	t_chunk		*c;
+	int			total_buckets;
+	int			total_chunks;
 	int			i;
 
 	i = 0;
+	total_buckets = 0;
+	total_chunks = 0;
 	while (i < 3)
 	{
 		b = tab[i];
 		while (b)
 		{
-			print_bucket_specs(b, STANDARD);
+			total_buckets++;
+			//print_bucket_specs(b, STANDARD);
 			c = b->chunks;
 			while (c)
 			{
-				print_chunk_specs(c);
+				total_chunks++;
+				//print_chunk_specs(c);
 				c = c->next;
 			}
 			b = b->next;
 		}
 		i++;
 	}
+	printf("Buckets: [%d]\nChunks: [%d]\n", total_buckets, total_chunks);
 }
 
 int main() 
 { 
-	int i; 
+	int i;
 	char *addr; 
 
 	i = 0; 
@@ -48,7 +55,9 @@ int main()
 	{ 
 		addr = (char*)ft_malloc(1024); 
 		addr[0] = 42; 
-		i++; 
-	} 
+		ft_free(addr);
+		i++;
+	}
+	print_all_data();
 	return (0); 
 } 

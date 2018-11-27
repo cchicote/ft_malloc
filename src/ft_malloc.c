@@ -12,21 +12,36 @@
 
 #include "ft_malloc.h"
 
+t_chunk		*find_free_chunk(t_bucket *b, size_t size)
+{
+	t_chunk *tmp;
+
+	tmp = b->chunks;
+	while (tmp)
+	{
+		if (tmp->size == size && tmp->is_free)
+			return (tmp);
+		tmp = tmp->next;
+	}
+	return (NULL);
+}
 
 t_chunk		*allocate_memory(void **b, size_t size)
 {
 	t_chunk		*chunk;
 	t_bucket	*bucket;
-	size_t		dimension;
-
 
 	bucket = (t_bucket*)*b;
-	dimension = (size_t)bucket->dimension == TINY ? TINY_MAX : SMALL_MAX;
-	chunk = (t_chunk*)(*b + sizeof(t_bucket) + bucket->chunks_allocated * sizeof(t_chunk));
+	if ((chunk = find_free_chunk(bucket, size)))
+	{
+		bucket->allocated += sizeof(t_chunk) + size;
+		return (chunk);
+	}
+	chunk = (t_chunk*)(*b + bucket->allocated);
 	chunk->size = size;
 	chunk->is_free = FALSE;
-	chunk->mem = (void*)(*b + bucket->offset + dimension * bucket->chunks_allocated);
-	bucket->chunks_allocated++;
+	chunk->mem = (void*)(*b + bucket->allocated + sizeof(t_chunk));
+	bucket->allocated += sizeof(t_chunk) + size;
 	chunk->next = NULL;
 	add_chunk_to_chunks(&bucket->chunks, chunk);
 	return (chunk);
@@ -38,14 +53,13 @@ t_chunk		*allocate_large_memory(void **b, size_t size)
 	t_bucket	*bucket;
 	size_t		dimension;
 
-
 	bucket = (t_bucket*)*b;
 	dimension = (size_t)bucket->dimension == TINY ? TINY_MAX : SMALL_MAX;
-	chunk = (t_chunk*)(*b + sizeof(t_bucket) + bucket->chunks_allocated * sizeof(t_chunk));
+	chunk = (t_chunk*)(*b + bucket->allocated);
 	chunk->size = size;
 	chunk->is_free = FALSE;
-	chunk->mem = (void*)(*b + bucket->offset + dimension * bucket->chunks_allocated);
-	bucket->chunks_allocated++;
+	chunk->mem = (void*)(*b + bucket->allocated + sizeof(t_chunk));
+	bucket->allocated += sizeof(t_chunk) + size;
 	chunk->next = NULL;
 	add_chunk_to_chunks(&bucket->chunks, chunk);
 	return (chunk);
@@ -58,9 +72,9 @@ void		*ft_malloc(size_t size)
 	bucket = NULL;
 	if (!size)
 		return (NULL);
-	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(g_saved_data.tiny)))
+	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(g_saved_data.tiny, size)))
 		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX);
-	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(g_saved_data.small)))
+	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(g_saved_data.small, size)))
 		bucket = new_bucket(&(g_saved_data.small), SMALL, SMALL_MAX);
 	else if (size > (size_t)SMALL_MAX)
 	{
