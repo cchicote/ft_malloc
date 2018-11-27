@@ -51,8 +51,7 @@ void		ft_free(void *ptr)
 		printf("WTF\n");
 		return ;
 	}
-	printf("Zone: [%p]\nSize: [%zu]\n", c->mem, c->size);
 	if (munmap(c->mem, c->size) == -1)
-		printf("Value of errno: %d\n", errno); 
+		printf("ERROR: Value of errno: %d\n", errno); 
 	c->is_free = TRUE;
 }

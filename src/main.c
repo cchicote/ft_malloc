@@ -38,29 +38,17 @@ void	print_all_data(void)
 	}
 }
 
-int		main()
-{
-	//ft_malloc(100000000000000);
-	//malloc(100000000000000);
-	/*int i;
+int main() 
+{ 
+	int i; 
+	char *addr; 
 
-	i = 0;
-	while (i < 200000)
-	{
-		malloc(100000);
-		i++;
-	}*/
-	void *z;
-
-	ft_malloc(100);
-	ft_malloc(100);
-	ft_malloc(100);
-	z = ft_malloc(100);
-	ft_malloc(100);
-	ft_malloc(100);
-	printf("%p\n", z);
-	//print_all_data();
-	ft_free(z);
-	//print_all_data();
-	return (0);
-}
+	i = 0; 
+	while (i < 1024) 
+	{ 
+		addr = (char*)ft_malloc(1024); 
+		addr[0] = 42; 
+		i++; 
+	} 
+	return (0); 
+} 

@@ -17,13 +17,35 @@ t_chunk		*allocate_memory(void **b, size_t size)
 {
 	t_chunk		*chunk;
 	t_bucket	*bucket;
+	size_t		dimension;
+
 
 	bucket = (t_bucket*)*b;
-	chunk = (t_chunk*)(*b + bucket->allocated);
-	bucket->allocated += sizeof(t_chunk) + size;
+	dimension = (size_t)bucket->dimension == TINY ? TINY_MAX : SMALL_MAX;
+	chunk = (t_chunk*)(*b + sizeof(t_bucket) + bucket->chunks_allocated * sizeof(t_chunk));
 	chunk->size = size;
 	chunk->is_free = FALSE;
-	chunk->mem = (void*)((void*)chunk + sizeof(t_chunk));
+	chunk->mem = (void*)(*b + bucket->offset + dimension * bucket->chunks_allocated);
+	bucket->chunks_allocated++;
+	chunk->next = NULL;
+	add_chunk_to_chunks(&bucket->chunks, chunk);
+	return (chunk);
+}
+
+t_chunk		*allocate_large_memory(void **b, size_t size)
+{
+	t_chunk		*chunk;
+	t_bucket	*bucket;
+	size_t		dimension;
+
+
+	bucket = (t_bucket*)*b;
+	dimension = (size_t)bucket->dimension == TINY ? TINY_MAX : SMALL_MAX;
+	chunk = (t_chunk*)(*b + sizeof(t_bucket) + bucket->chunks_allocated * sizeof(t_chunk));
+	chunk->size = size;
+	chunk->is_free = FALSE;
+	chunk->mem = (void*)(*b + bucket->offset + dimension * bucket->chunks_allocated);
+	bucket->chunks_allocated++;
 	chunk->next = NULL;
 	add_chunk_to_chunks(&bucket->chunks, chunk);
 	return (chunk);
@@ -32,18 +54,18 @@ t_chunk		*allocate_memory(void **b, size_t size)
 void		*ft_malloc(size_t size)
 {
 	t_bucket *bucket;
-	t_chunk *ret;
 
 	bucket = NULL;
-	ret = NULL;
 	if (!size)
 		return (NULL);
-	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(size, g_saved_data.tiny)))
+	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(g_saved_data.tiny)))
 		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX);
-	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(size, g_saved_data.small)))
+	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(g_saved_data.small)))
 		bucket = new_bucket(&(g_saved_data.small), SMALL, SMALL_MAX);
 	else if (size > (size_t)SMALL_MAX)
+	{
 		bucket = new_large_bucket(&(g_saved_data.large), LARGE, size);
-	ret = allocate_memory((void**)&bucket, size);
-	return (ret->mem);
+		return (allocate_large_memory((void**)&bucket, size)->mem);
+	}
+	return (allocate_memory((void**)&bucket, size)->mem);
 }
