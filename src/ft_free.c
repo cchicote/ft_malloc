@@ -12,9 +12,32 @@
 
 #include "ft_malloc.h"
 
-t_bucket		*get_bucket(void *ptr)
+void			refragment_bucket(t_bucket *b)
 {
-	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small, g_saved_data.large};
+	t_chunk		*c;
+
+	c = b->chunks;
+	while (c)
+	{
+		if (c->is_free && c->next && c->next->is_free &&
+			c->size + sizeof(t_chunk) + c->next->size <= b->chunk_max_size)
+		{
+			c->size += sizeof(t_chunk) + c->next->size;
+			c->next = c->next->next;
+		}
+		c = c->next;
+	}
+}
+
+void		free_chunk(t_bucket *b, t_chunk *c)
+{
+	b->allocated = b->allocated - c->size - sizeof(t_chunk);
+	c->is_free = TRUE;
+	refragment_bucket(b);
+}
+
+t_bucket		*get_bucket(void *ptr, t_bucket *tab[3])
+{
 	t_bucket	*b;
 	t_chunk		*c;
 	int			i;
@@ -30,8 +53,7 @@ t_bucket		*get_bucket(void *ptr)
 			{
 				if (c->mem == ptr)
 				{
-					b->allocated -= c->size - sizeof(t_chunk);
-					c->is_free = TRUE;
+					free_chunk(b, c);
 					return (b);
 				}
 				c = c->next;
@@ -46,8 +68,6 @@ int			is_bucket_to_free(t_bucket *b)
 {
 	t_chunk	*tmp;
 	
-	if (b == g_saved_data.tiny || b == g_saved_data.small || b == g_saved_data.large)
-		return (FALSE);
 	tmp = b->chunks;
 	while (tmp)
 	{
@@ -55,22 +75,22 @@ int			is_bucket_to_free(t_bucket *b)
 			return (FALSE);
 		tmp = tmp->next;
 	}
+	b->is_free = TRUE;
+	if (b == g_saved_data.tiny || b == g_saved_data.small || b == g_saved_data.large)
+		return (FALSE);
 	return (TRUE);
 }
 
 void		ft_free(void *ptr)
 {
-	t_bucket *b;
+	t_bucket 	*b;
+	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small,
+							g_saved_data.large};
 
 	if (!ptr)
 		return ;
-	if (!(b = get_bucket(ptr)))
-	{
-		printf("WTF\n");
+	if (!(b = get_bucket(ptr, tab)))
 		return ;
-	}
 	if (is_bucket_to_free(b))
-	{
 		free_bucket(b);
-	}
 }

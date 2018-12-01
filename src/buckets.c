@@ -51,8 +51,11 @@ t_bucket		*new_bucket(t_bucket **head, int dimension, size_t chunk_size)
 			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
 	new->dimension = dimension;
+	new->chunk_min_size = dimension == TINY ? 1 : TINY_MAX + 1;
+	new->chunk_max_size = dimension == TINY ? TINY_MAX : SMALL_MAX;
 	new->allocatable = bucket_size;
 	new->allocated = sizeof(t_bucket);
+	new->is_free = TRUE;
 	add_bucket_to_buckets(head, new);
 	return (new);
 }
@@ -61,16 +64,19 @@ t_bucket		*new_large_bucket(t_bucket **head, int dimension, size_t chunk_size)
 {
 	t_bucket	*new;
 	size_t		bucket_size;
-
-	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size) * 100;
+	
+	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size);
 	bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
-
+	
 	new = (t_bucket*)mmap(NULL, bucket_size, 
 			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
 	new->dimension = dimension;
+	new->chunk_min_size = SMALL_MAX + 1;
+	new->chunk_max_size = chunk_size;
 	new->allocatable = bucket_size;
-	new->allocated = 0;
+	new->allocated = sizeof(t_bucket);
+	new->is_free = TRUE;
 	add_bucket_to_buckets(head, new);
 	return (new);
 }

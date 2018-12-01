@@ -40,8 +40,8 @@
 ** M -> SMALL
 */
 
-# define TINY_MAX (8 * getpagesize())
-# define SMALL_MAX (32 * getpagesize())
+# define TINY_MAX (1 * getpagesize())
+# define SMALL_MAX (8 * getpagesize())
 
 typedef struct 		s_chunk
 {
@@ -56,6 +56,9 @@ typedef struct		s_bucket
 	size_t			allocated;
 	size_t			allocatable;
 	int				dimension;
+	size_t			chunk_min_size;
+	size_t			chunk_max_size;
+	int				is_free;
 	t_chunk			*chunks;
 	//t_chunk			chunks[100];
 	struct s_bucket	*next;
@@ -80,6 +83,9 @@ t_chunk				*find_free_chunk(t_bucket *b, size_t size);
 **					FT_FREE.C
 */
 void				ft_free(void *ptr);
+t_bucket			*get_bucket(void *ptr, t_bucket *tab[3]);
+void				free_chunk(t_bucket *b, t_chunk *c);
+
 
 /*
 **					FT_REALLOC.C
@@ -104,6 +110,9 @@ size_t				available(t_bucket *b);
 void				add_bucket_to_buckets(t_bucket **head, t_bucket *bucket);
 void				add_chunk_to_chunks(t_chunk **head, t_chunk *chunk);
 
-
+/*
+**					SHOW_ALLOC_MEM.C
+*/
+void				show_alloc_mem(void);
 
 #endif

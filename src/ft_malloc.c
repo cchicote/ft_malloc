@@ -42,6 +42,7 @@ t_chunk		*allocate_memory(void **b, size_t size)
 	chunk->is_free = FALSE;
 	chunk->mem = (void*)(*b + bucket->allocated + sizeof(t_chunk));
 	bucket->allocated += sizeof(t_chunk) + size;
+	bucket->is_free = FALSE;
 	chunk->next = NULL;
 	add_chunk_to_chunks(&bucket->chunks, chunk);
 	return (chunk);
@@ -51,15 +52,19 @@ t_chunk		*allocate_large_memory(void **b, size_t size)
 {
 	t_chunk		*chunk;
 	t_bucket	*bucket;
-	size_t		dimension;
 
 	bucket = (t_bucket*)*b;
-	dimension = (size_t)bucket->dimension == TINY ? TINY_MAX : SMALL_MAX;
+	if ((chunk = find_free_chunk(bucket, size)))
+	{
+		bucket->allocated += sizeof(t_chunk) + size;
+		return (chunk);
+	}
 	chunk = (t_chunk*)(*b + bucket->allocated);
 	chunk->size = size;
 	chunk->is_free = FALSE;
 	chunk->mem = (void*)(*b + bucket->allocated + sizeof(t_chunk));
 	bucket->allocated += sizeof(t_chunk) + size;
+	bucket->is_free = FALSE;
 	chunk->next = NULL;
 	add_chunk_to_chunks(&bucket->chunks, chunk);
 	return (chunk);
