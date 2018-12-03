@@ -29,7 +29,7 @@ void			refragment_bucket(t_bucket *b)
 	}
 }
 
-void		free_chunk(t_bucket *b, t_chunk *c)
+void			free_chunk(t_bucket *b, t_chunk *c)
 {
 	b->allocated = b->allocated - c->size - sizeof(t_chunk);
 	c->is_free = TRUE;
@@ -64,10 +64,10 @@ t_bucket		*get_bucket(void *ptr, t_bucket *tab[3])
 	return (NULL);
 }
 
-int			is_bucket_to_free(t_bucket *b)
+int				is_bucket_to_free(t_bucket *b)
 {
 	t_chunk	*tmp;
-	
+
 	tmp = b->chunks;
 	while (tmp)
 	{
@@ -76,16 +76,17 @@ int			is_bucket_to_free(t_bucket *b)
 		tmp = tmp->next;
 	}
 	b->is_free = TRUE;
-	if (b == g_saved_data.tiny || b == g_saved_data.small || b == g_saved_data.large)
+	if (b == g_saved_data.tiny || b == g_saved_data.small ||
+		b == g_saved_data.large)
 		return (FALSE);
 	return (TRUE);
 }
 
-void		ft_free(void *ptr)
+void			ft_free(void *ptr)
 {
-	t_bucket 	*b;
+	t_bucket	*b;
 	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small,
-							g_saved_data.large};
+		g_saved_data.large};
 
 	if (!ptr)
 		return ;

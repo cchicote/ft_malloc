@@ -43,7 +43,7 @@
 # define TINY_MAX (1 * getpagesize())
 # define SMALL_MAX (8 * getpagesize())
 
-typedef struct 		s_chunk
+typedef struct		s_chunk
 {
 	size_t			size;
 	int				is_free;
@@ -60,7 +60,6 @@ typedef struct		s_bucket
 	size_t			chunk_max_size;
 	int				is_free;
 	t_chunk			*chunks;
-	//t_chunk			chunks[100];
 	struct s_bucket	*next;
 }					t_bucket;
 
@@ -77,6 +76,8 @@ extern t_global		g_saved_data;
 **					FT_MALLOC.C
 */
 void				*ft_malloc(size_t size);
+t_chunk				*allocate_memory(void **b, size_t size);
+t_chunk				*allocate_large_memory(void **b, size_t size);
 t_chunk				*find_free_chunk(t_bucket *b, size_t size);
 
 /*
@@ -85,20 +86,25 @@ t_chunk				*find_free_chunk(t_bucket *b, size_t size);
 void				ft_free(void *ptr);
 t_bucket			*get_bucket(void *ptr, t_bucket *tab[3]);
 void				free_chunk(t_bucket *b, t_chunk *c);
-
+void				refragment_bucket(t_bucket *b);
+int					is_bucket_to_free(t_bucket *b);
 
 /*
 **					FT_REALLOC.C
 */
+t_chunk				*get_chunk(void *ptr, t_bucket *tab[3], t_bucket **bucket);
 void				*ft_realloc(void *ptr, size_t size);
+void				*new_chunk(t_bucket *b, t_chunk *c, size_t size,
+						void *data);
+void				*resize_chunk(t_bucket *b, t_chunk *c, size_t new_size);
 
 /*
 **					BUCKETS.C
-*/	
-	
-t_bucket			*new_bucket(t_bucket **head, int dimension, size_t chunk_size);
+*/
+t_bucket			*new_bucket(t_bucket **head, int dimension,
+						size_t chunk_size);
 t_bucket			*retrieve_bucket(t_bucket *head, size_t size);
-t_bucket			*new_large_bucket(t_bucket **head, int dimension, size_t chunk_size);
+t_bucket			*new_large_bucket(t_bucket **head, size_t chunk_size);
 void				free_bucket(t_bucket *b);
 
 /*
@@ -114,5 +120,9 @@ void				add_chunk_to_chunks(t_chunk **head, t_chunk *chunk);
 **					SHOW_ALLOC_MEM.C
 */
 void				show_alloc_mem(void);
+void				print_address_hex(long num, int depth);
+void				print_bucket_start(t_bucket *bucket, char *dim);
+void				print_chunk_data(t_chunk *c);
+size_t				print_bucket(t_bucket *bucket, char *dim);
 
 #endif

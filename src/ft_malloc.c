@@ -77,13 +77,15 @@ void		*ft_malloc(size_t size)
 	bucket = NULL;
 	if (!size)
 		return (NULL);
-	if (size <= (size_t)TINY_MAX && !(bucket = retrieve_bucket(g_saved_data.tiny, size)))
+	if (size <= (size_t)TINY_MAX && !(bucket =
+		retrieve_bucket(g_saved_data.tiny, size)))
 		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX);
-	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX && !(bucket = retrieve_bucket(g_saved_data.small, size)))
+	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX &&
+		!(bucket = retrieve_bucket(g_saved_data.small, size)))
 		bucket = new_bucket(&(g_saved_data.small), SMALL, SMALL_MAX);
 	else if (size > (size_t)SMALL_MAX)
 	{
-		bucket = new_large_bucket(&(g_saved_data.large), LARGE, size);
+		bucket = new_large_bucket(&(g_saved_data.large), size);
 		return (allocate_large_memory((void**)&bucket, size)->mem);
 	}
 	return (allocate_memory((void**)&bucket, size)->mem);

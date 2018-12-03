@@ -13,7 +13,7 @@
 #include "ft_malloc.h"
 #define M 1024 * 1024
 
-void	print_all_data(void)
+/*void	print_all_data(void)
 {
 	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small, g_saved_data.large};
 	t_bucket	*b;
@@ -44,7 +44,7 @@ void	print_all_data(void)
 		i++;
 	}
 	printf("Buckets: [%d]\nChunks: [%d]\n", total_buckets, total_chunks);
-}
+}*/
 
 void	test_1(void)
 {

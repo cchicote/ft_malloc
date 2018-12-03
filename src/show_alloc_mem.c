@@ -11,9 +11,8 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-#include <stdint.h>
 
-static void	print_address_hex(long num, int depth)
+void		print_address_hex(long num, int depth)
 {
 	if (depth == 0)
 	{
@@ -49,9 +48,9 @@ void		print_chunk_data(t_chunk *c)
 
 size_t		print_bucket(t_bucket *bucket, char *dim)
 {
-	t_bucket *b;
-	t_chunk	*c;
-	size_t total;
+	t_bucket	*b;
+	t_chunk		*c;
+	size_t		total;
 
 	b = bucket;
 	if (bucket->is_free)
@@ -73,17 +72,10 @@ size_t		print_bucket(t_bucket *bucket, char *dim)
 	return (total);
 }
 
-void		print_total(size_t total)
-{
-	ft_putstr("Total : ");
-	ft_putnbr(total);
-	ft_putendl(" octets");
-}
-
 void		show_alloc_mem(void)
 {
 	size_t total;
-	
+
 	total = 0;
 	if (g_saved_data.tiny)
 		total += print_bucket(g_saved_data.tiny, "TINY");
@@ -92,5 +84,9 @@ void		show_alloc_mem(void)
 	if (g_saved_data.large)
 		total += print_bucket(g_saved_data.large, "LARGE");
 	if (total > 0)
-		print_total(total);
+	{
+		ft_putstr("Total : ");
+		ft_putnbr(total);
+		ft_putendl(" octets");
+	}
 }
