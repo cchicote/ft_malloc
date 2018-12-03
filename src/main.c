@@ -150,6 +150,7 @@ void	test_refragment()
 	ft_free(z1);
 	ft_free(z2);
 	z4 = ft_malloc(2048 + sizeof(t_chunk));
+	show_alloc_mem();
 }
 
 int main() 
@@ -161,5 +162,6 @@ int main()
 	//test_5();
 	//test_6();
 	//test_7();
+	test_refragment();
 	return (0); 
 } 
