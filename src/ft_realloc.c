@@ -62,20 +62,19 @@ void		*ft_realloc(void *ptr, size_t size)
 {
 	t_bucket	*b;
 	t_chunk		*c;
-	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small,
-		g_saved_data.large};
+	t_bucket	*tab[3];
 
+	tab[0] = g_saved_data.tiny;
+	tab[1] = g_saved_data.small;
+	tab[2] = g_saved_data.large;
 	if (!ptr || !size || !(c = get_chunk(ptr, tab, &b)))
 		return (NULL);
 	if (size == c->size)
 		return (ptr);
-	else if (size < c->size)
-	{
-		if (size >= b->chunk_min_size)
-			return (resize_chunk(b, c, size));
-		else
-			return (new_chunk(b, c, size, ptr));
-	}
+	else if (size < c->size && size >= b->chunk_min_size)
+		return (resize_chunk(b, c, size));
+	else if (size < c->size && size < b->chunk_min_size)
+		return (new_chunk(b, c, size, ptr));
 	else if (size > c->size)
 	{
 		if (size <= b->chunk_max_size &&

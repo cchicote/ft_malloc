@@ -64,9 +64,9 @@ size_t		print_bucket(t_bucket *bucket, char *dim)
 		{
 			if (!c->is_free || c->is_free)
 				print_chunk_data(c);
-			total += !c->is_free ? sizeof(t_chunk) + c->size : 0;
 			c = c->next;
 		}
+		total += b->allocated;
 		b = b->next;
 	}
 	return (total);

@@ -50,7 +50,6 @@ t_bucket		*new_bucket(t_bucket **head, int dimension, size_t chunk_size)
 
 	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size) * 100;
 	bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
-
 	new = (t_bucket*)mmap(NULL, bucket_size,
 			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	new->dimension = dimension;

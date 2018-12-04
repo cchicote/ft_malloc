@@ -85,9 +85,11 @@ int				is_bucket_to_free(t_bucket *b)
 void			ft_free(void *ptr)
 {
 	t_bucket	*b;
-	t_bucket	*tab[3] = {g_saved_data.tiny, g_saved_data.small,
-		g_saved_data.large};
+	t_bucket	*tab[3];
 
+	tab[0] = g_saved_data.tiny;
+	tab[1] = g_saved_data.small;
+	tab[2] = g_saved_data.large;
 	if (!ptr)
 		return ;
 	if (!(b = get_bucket(ptr, tab)))
