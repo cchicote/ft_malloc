@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-#include <errno.h>
 
 t_global		g_saved_data;
 
