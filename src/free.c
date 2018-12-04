@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_free.c                                          :+:      :+:    :+:   */
+/*   free.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "malloc.h"
 
 void			refragment_bucket(t_bucket *b)
 {
@@ -82,7 +82,7 @@ int				is_bucket_to_free(t_bucket *b)
 	return (TRUE);
 }
 
-void			ft_free(void *ptr)
+void			free(void *ptr)
 {
 	t_bucket	*b;
 	t_bucket	*tab[3];

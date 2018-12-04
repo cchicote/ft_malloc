@@ -10,10 +10,15 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME 			= ft_malloc
+ifeq ($(HOSTTYPE),)
+	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
+endif
+
+NAME = libft_malloc_$(HOSTTYPE).so
+LINK = libft_malloc.so
 
 CC 				= gcc
-CFLAGS 			= -Wall -Wextra -g #-Werror
+CFLAGS 			= -Wall -Wextra -Werror
 LFLAGS 			= -lft
 INC 			= -I$(INCLUDE_PATH)
 
@@ -22,13 +27,12 @@ LIBFT_PATH 		= ./libft
 SRC_PATH 		= ./src/
 OBJ_PATH 		= ./obj/
 
-SRCS 			= ft_malloc.c \
-					ft_free.c \
-					ft_realloc.c \
+SRCS 			= malloc.c \
+					free.c \
+					realloc.c \
 					buckets.c \
 					utils.c \
-					show_alloc_mem.c \
-					main.c
+					show_alloc_mem.c
 OBJS 			= $(SRCS:.c=.o)
 
 SRC 			= $(addprefix $(SRC_PATH), $(SRCS))
@@ -42,8 +46,9 @@ $(LIBFT):
 	@ make -sC $(LIBFT_PATH)
 
 $(NAME): $(LIBFT) $(OBJ)
-	@ echo "Compiling executable"
-	@ $(CC) $(CFLAGS) $(OBJ) -L $(LIBFT_PATH) $(LFLAGS) -o $@
+	@ $(CC) $(CFLAGS) -shared -o $@ $(OBJ) -L $(LIBFT_PATH) $(LFLAGS)
+	@ ln -sf $(NAME) $(LINK)
+	@ echo "Compiled"
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@ echo "Compiling objects"
@@ -57,8 +62,9 @@ clean:
 	@ make clean -sC $(LIBFT_PATH)
 
 fclean: clean
-	@ echo "Cleaning $(NAME)"
+	@ echo "Cleaning $(NAME) and $(LINK)"
 	@ /bin/rm -f $(NAME)
+	@ /bin/rm -f $(LINK)
 	@ echo "Fcleaning libft"
 	@ make fclean -sC $(LIBFT_PATH)
 

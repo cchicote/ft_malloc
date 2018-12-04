@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_malloc.h                                        :+:      :+:    :+:   */
+/*   malloc.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_MALLOC_H
-# define FT_MALLOC_H
+#ifndef MALLOC_H
+# define MALLOC_H
 
 # include "../libft/includes/libft.h"
 # include <stdlib.h>
@@ -73,27 +73,27 @@ typedef struct		s_global
 extern t_global		g_saved_data;
 
 /*
-**					FT_MALLOC.C
+**					MALLOC.C
 */
-void				*ft_malloc(size_t size);
+void				*malloc(size_t size);
 t_chunk				*allocate_memory(void **b, size_t size);
 t_chunk				*allocate_large_memory(void **b, size_t size);
 t_chunk				*find_free_chunk(t_bucket *b, size_t size);
 
 /*
-**					FT_FREE.C
+**					FREE.C
 */
-void				ft_free(void *ptr);
+void				free(void *ptr);
 t_bucket			*get_bucket(void *ptr, t_bucket *tab[3]);
 void				free_chunk(t_bucket *b, t_chunk *c);
 void				refragment_bucket(t_bucket *b);
 int					is_bucket_to_free(t_bucket *b);
 
 /*
-**					FT_REALLOC.C
+**					REALLOC.C
 */
 t_chunk				*get_chunk(void *ptr, t_bucket *tab[3], t_bucket **bucket);
-void				*ft_realloc(void *ptr, size_t size);
+void				*realloc(void *ptr, size_t size);
 void				*new_chunk(t_bucket *b, t_chunk *c, size_t size,
 						void *data);
 void				*resize_chunk(t_bucket *b, t_chunk *c, size_t new_size);

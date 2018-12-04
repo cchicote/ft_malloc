@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_realloc.c                                       :+:      :+:    :+:   */
+/*   realloc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "malloc.h"
 
 t_chunk		*get_chunk(void *ptr, t_bucket *tab[3], t_bucket **bucket)
 {
@@ -44,7 +44,7 @@ void		*new_chunk(t_bucket *b, t_chunk *c, size_t size, void *data)
 {
 	void		*new_zone;
 
-	if (!(new_zone = ft_malloc(size)))
+	if (!(new_zone = malloc(size)))
 		return (NULL);
 	ft_memcpy(new_zone, data, c->size);
 	free_chunk(b, c);
@@ -58,7 +58,7 @@ void		*resize_chunk(t_bucket *b, t_chunk *c, size_t new_size)
 	return (c->mem);
 }
 
-void		*ft_realloc(void *ptr, size_t size)
+void		*realloc(void *ptr, size_t size)
 {
 	t_bucket	*b;
 	t_chunk		*c;

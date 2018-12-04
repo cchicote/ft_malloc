@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "malloc.h"
 
 void			add_bucket_to_buckets(t_bucket **head, t_bucket *bucket)
 {

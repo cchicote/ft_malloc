@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_malloc.c                                        :+:      :+:    :+:   */
+/*   malloc.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "malloc.h"
 
 t_chunk		*find_free_chunk(t_bucket *b, size_t size)
 {
@@ -70,7 +70,7 @@ t_chunk		*allocate_large_memory(void **b, size_t size)
 	return (chunk);
 }
 
-void		*ft_malloc(size_t size)
+void		*malloc(size_t size)
 {
 	t_bucket *bucket;
 
