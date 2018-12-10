@@ -75,7 +75,8 @@ void		*realloc(void *ptr, size_t size)
 		free(ptr);
 		return (malloc(1));
 	}
-	c = get_chunk(ptr, tab, &b);
+	if (!(c = get_chunk(ptr, tab, &b)))
+		return (NULL);
 	if (size == c->size)
 		return (ptr);
 	else if (size < c->size && size >= b->chunk_min_size)
