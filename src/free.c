@@ -31,7 +31,7 @@ void			refragment_bucket(t_bucket *b)
 
 void			free_chunk(t_bucket *b, t_chunk *c)
 {
-	b->allocated = b->allocated - c->size - sizeof(t_chunk);
+	b->allocated -= c->size;
 	c->is_free = TRUE;
 	refragment_bucket(b);
 }

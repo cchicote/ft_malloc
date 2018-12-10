@@ -53,7 +53,8 @@ void		*new_chunk(t_bucket *b, t_chunk *c, size_t size, void *data)
 
 void		*resize_chunk(t_bucket *b, t_chunk *c, size_t new_size)
 {
-	b->allocated = b->allocated - c->size - new_size;
+	b->allocated -= c->size;
+	b->allocated += new_size;
 	c->size = new_size;
 	return (c->mem);
 }
@@ -67,8 +68,14 @@ void		*realloc(void *ptr, size_t size)
 	tab[0] = g_saved_data.tiny;
 	tab[1] = g_saved_data.small;
 	tab[2] = g_saved_data.large;
-	if (!ptr || !size || !(c = get_chunk(ptr, tab, &b)))
-		return (NULL);
+	if (!ptr)
+		return (malloc(size));
+	if (!size && ptr)
+	{
+		free(ptr);
+		return (malloc(1));
+	}
+	c = get_chunk(ptr, tab, &b);
 	if (size == c->size)
 		return (ptr);
 	else if (size < c->size && size >= b->chunk_min_size)
