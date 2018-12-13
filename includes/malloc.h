@@ -22,45 +22,28 @@
 # define TRUE 1
 # define FALSE 0
 
-# define NEW 1
-# define RETRIEVED 2
-# define STANDARD 3
-
-/*
-** CODE DE DIMENSION DES ZONES
-*/
-
-# define TINY 1
-# define SMALL 2
-# define LARGE 3
-
 /*
 ** TAILLE MAXIMALE DES CHUNKS
 ** N -> TINY
 ** M -> SMALL
 */
 
-# define TINY_MAX (1 * getpagesize())
-# define SMALL_MAX (8 * getpagesize())
+# define TINY 256
+# define SMALL 1024
 
 typedef struct		s_chunk
 {
 	size_t			size;
-	int				is_free;
 	void			*mem;
-	struct s_chunk	*next;
 }					t_chunk;
 
 typedef struct		s_bucket
 {
-	size_t			allocated;
-	size_t			allocatable;
-	int				dimension;
-	size_t			chunk_min_size;
 	size_t			chunk_max_size;
-	int				is_free;
-	t_chunk			*chunks;
+	size_t			size;
 	struct s_bucket	*next;
+	size_t			chunks;
+	t_chunk			chunks_tab[];
 }					t_bucket;
 
 typedef struct		s_global
@@ -76,45 +59,54 @@ extern t_global		g_saved_data;
 **					MALLOC.C
 */
 void				*malloc(size_t size);
-t_chunk				*allocate_memory(void **b, size_t size);
-t_chunk				*allocate_large_memory(void **b, size_t size);
-t_chunk				*find_free_chunk(t_bucket *b, size_t size);
+void                *new_allocation(t_bucket *bucket, size_t size);
+void                *new_large_allocation(t_bucket *bucket, size_t size);
 
 /*
 **					FREE.C
 */
 void				free(void *ptr);
-t_bucket			*get_bucket(void *ptr, t_bucket *tab[3]);
-void				free_chunk(t_bucket *b, t_chunk *c);
-void				refragment_bucket(t_bucket *b);
-int					is_bucket_to_free(t_bucket *b);
+void                free_bucket(t_bucket *bucket, t_bucket *previous);
+void                retrieve_and_free_bucket(void *ptr);
+int                 retrieve_and_free_chunk(t_bucket *bucket, void *ptr);
+void                free_chunk(t_bucket *bucket, size_t i);
 
 /*
 **					REALLOC.C
 */
-t_chunk				*get_chunk(void *ptr, t_bucket *tab[3], t_bucket **bucket);
 void				*realloc(void *ptr, size_t size);
-void				*new_chunk(t_bucket *b, t_chunk *c, size_t size,
-						void *data);
-void				*resize_chunk(t_bucket *b, t_chunk *c, size_t new_size);
+void              	*realloc_chunk(void *ptr, size_t new_size);
+t_bucket            *retrieve_bucket(void *ptr);
+size_t              retrieve_chunk_index(t_bucket *bucket, void *ptr);
+int                 is_chunk_in_bucket(t_bucket *bucket, void *ptr);
+
+/*
+**					CALLOC.C
+*/
+void				*calloc(size_t count, size_t size);
 
 /*
 **					BUCKETS.C
 */
-t_bucket			*new_bucket(t_bucket **head, int dimension,
-						size_t chunk_size);
-t_bucket			*retrieve_bucket(t_bucket *head, size_t size);
-t_bucket			*new_large_bucket(t_bucket **head, size_t chunk_size);
-void				free_bucket(t_bucket *b);
+t_bucket			**get_correct_head(size_t size);
+t_bucket			*new_bucket(t_bucket **head, size_t size);
+t_bucket			*new_large_bucket(t_bucket **head, size_t size);
+t_bucket			*find_free_space(t_bucket **head, size_t size);
+t_bucket			*get_bucket(size_t size);
+
+/*
+**					CHUNKS.C
+*/
+void				init_chunks(t_bucket *bucket, size_t chunk_max_size);
+void                init_large_chunk(t_bucket *bucket);
+size_t         		get_chunk_max_size(size_t size);
+int					find_free_chunk(t_bucket *bucket);
 
 /*
 **					UTILS.C
 */
-void				print_bucket_specs(t_bucket *bucket, int code);
-void				print_chunk_specs(t_chunk *chunk);
-size_t				available(t_bucket *b);
 void				add_bucket_to_buckets(t_bucket **head, t_bucket *bucket);
-void				add_chunk_to_chunks(t_chunk **head, t_chunk *chunk);
+int                 is_bucket_free(t_bucket *bucket);
 
 /*
 **					SHOW_ALLOC_MEM.C
@@ -122,7 +114,7 @@ void				add_chunk_to_chunks(t_chunk **head, t_chunk *chunk);
 void				show_alloc_mem(void);
 void				print_address_hex(long num, int depth);
 void				print_bucket_start(t_bucket *bucket, char *dim);
-void				print_chunk_data(t_chunk *c);
+size_t				print_chunk_data(t_chunk c);
 size_t				print_bucket(t_bucket *bucket, char *dim);
 
 #endif

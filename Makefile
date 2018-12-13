@@ -16,6 +16,7 @@ endif
 
 NAME = libft_malloc_$(HOSTTYPE).so
 LINK = libft_malloc.so
+#NAME = ft_malloc
 
 CC 				= gcc
 CFLAGS 			= -Wall -Wextra -Werror
@@ -30,8 +31,10 @@ OBJ_PATH 		= ./obj/
 SRCS 			= malloc.c \
 					free.c \
 					realloc.c \
-					buckets.c \
+					calloc.c \
 					utils.c \
+					buckets.c \
+					chunks.c \
 					show_alloc_mem.c
 OBJS 			= $(SRCS:.c=.o)
 
@@ -46,6 +49,7 @@ $(LIBFT):
 	@ make -sC $(LIBFT_PATH)
 
 $(NAME): $(LIBFT) $(OBJ)
+	@ #$(CC) $(CFLAGS) -o $@ $(OBJ) -L $(LIBFT_PATH) $(LFLAGS)
 	@ $(CC) $(CFLAGS) -shared -o $@ $(OBJ) -L $(LIBFT_PATH) $(LFLAGS)
 	@ ln -sf $(NAME) $(LINK)
 	@ echo "Compiled"

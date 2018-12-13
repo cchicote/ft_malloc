@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/28 13:02:42 by cchicote          #+#    #+#             */
-/*   Updated: 2018/11/28 13:02:48 by cchicote         ###   ########.fr       */
+/*   Created: 2018/12/13 16:26:32 by cchicote          #+#    #+#             */
+/*   Updated: 2018/12/13 16:26:38 by cchicote         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,37 +36,38 @@ void		print_bucket_start(t_bucket *bucket, char *dim)
 	ft_putchar('\n');
 }
 
-void		print_chunk_data(t_chunk *c)
+size_t		print_chunk_data(t_chunk c)
 {
-	print_address_hex((long)c + 1, 9);
+	print_address_hex((long)c.mem, 9);
 	ft_putstr(" - ");
-	print_address_hex((long)c + c->size, 9);
+	print_address_hex((long)c.mem + c.size - sizeof(t_chunk), 9);
 	ft_putstr(" : ");
-	ft_putnbr(c->size);
+	ft_putnbr(c.size);
 	ft_putendl(" octets");
+    return (c.size);
 }
 
 size_t		print_bucket(t_bucket *bucket, char *dim)
 {
 	t_bucket	*b;
-	t_chunk		*c;
+    size_t      i;
 	size_t		total;
 
 	b = bucket;
-	if (bucket->is_free)
+    total = 0;
+	if (is_bucket_free(bucket))
 		return (0);
-	total = 0;
 	print_bucket_start(bucket, dim);
 	while (b)
 	{
-		c = b->chunks;
-		while (c)
+        //print_bucket_start(bucket, dim);
+		i = 0;
+		while (i < b->chunks)
 		{
-			if (!c->is_free || c->is_free)
-				print_chunk_data(c);
-			c = c->next;
+			if (b->chunks_tab[i].size)
+				total += print_chunk_data(b->chunks_tab[i]);
+			i++;
 		}
-		total += b->allocated;
 		b = b->next;
 	}
 	return (total);

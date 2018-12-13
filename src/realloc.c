@@ -5,91 +5,98 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/07 16:14:26 by cchicote          #+#    #+#             */
-/*   Updated: 2018/11/07 16:14:32 by cchicote         ###   ########.fr       */
+/*   Created: 2018/12/13 16:25:21 by cchicote          #+#    #+#             */
+/*   Updated: 2018/12/13 16:25:32 by cchicote         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "malloc.h"
 
-t_chunk		*get_chunk(void *ptr, t_bucket *tab[3], t_bucket **bucket)
+int                 is_chunk_in_bucket(t_bucket *bucket, void *ptr)
 {
-	t_bucket	*b;
-	t_chunk		*c;
-	int			i;
+    size_t          i;
 
-	i = -1;
-	while (++i < 3)
-	{
-		b = tab[i];
-		while (b)
-		{
-			c = b->chunks;
-			while (c)
-			{
-				if (c->mem == ptr)
-				{
-					*bucket = b;
-					return (c);
-				}
-				c = c->next;
-			}
-			b = b->next;
-		}
-	}
-	return (NULL);
+    i = 0;
+    while (i < bucket->chunks)
+    {
+        if (bucket->chunks_tab[i].mem == ptr)
+            return (TRUE);
+        i++;
+    }
+    return (FALSE);
 }
 
-void		*new_chunk(t_bucket *b, t_chunk *c, size_t size, void *data)
+size_t              retrieve_chunk_index(t_bucket *bucket, void *ptr)
 {
-	void		*new_zone;
+    size_t          i;
 
-	if (!(new_zone = malloc(size)))
-		return (NULL);
-	ft_memcpy(new_zone, data, c->size);
-	free_chunk(b, c);
-	return (new_zone);
+    i = 0;
+    while (i < bucket->chunks)
+    {
+        if (bucket->chunks_tab[i].mem == ptr)
+            return (i);
+        i++;
+    }
+    return (0);
 }
 
-void		*resize_chunk(t_bucket *b, t_chunk *c, size_t new_size)
+t_bucket            *retrieve_bucket(void *ptr)
 {
-	b->allocated -= c->size;
-	b->allocated += new_size;
-	c->size = new_size;
-	return (c->mem);
-}
+    t_bucket	    *tab[3];
+    t_bucket        *bucket;
+    int             i;
 
-void		*realloc(void *ptr, size_t size)
-{
-	t_bucket	*b;
-	t_chunk		*c;
-	t_bucket	*tab[3];
-
+    i = -1;
 	tab[0] = g_saved_data.tiny;
 	tab[1] = g_saved_data.small;
 	tab[2] = g_saved_data.large;
-	if (!ptr)
-		return (malloc(size));
-	if (!size && ptr)
-	{
-		free(ptr);
-		return (malloc(1));
-	}
-	if (!(c = get_chunk(ptr, tab, &b)))
-		return (NULL);
-	if (size == c->size)
-		return (ptr);
-	else if (size < c->size && size >= b->chunk_min_size)
-		return (resize_chunk(b, c, size));
-	else if (size < c->size && size < b->chunk_min_size)
-		return (new_chunk(b, c, size, ptr));
-	else if (size > c->size)
-	{
-		if (size <= b->chunk_max_size &&
-			b->allocated - c->size + size >= available(b) && c->next == NULL)
-			return (resize_chunk(b, c, size));
-		else
-			return (new_chunk(b, c, size, ptr));
-	}
-	return (NULL);
+    while (++i < 3)
+    {
+        bucket = tab[i];
+        while (bucket)
+        {
+            if (is_chunk_in_bucket(bucket, ptr))
+                return (bucket);
+            bucket = bucket->next;
+        }
+    }
+    return (NULL);
+}
+
+void                *realloc_chunk(void *ptr, size_t new_size)
+{
+    t_bucket        *bucket;
+    void            *tmp;
+    size_t          chunk_index;
+
+    tmp = NULL;
+    if (!(bucket = retrieve_bucket(ptr)))
+        return (NULL);
+    chunk_index = retrieve_chunk_index(bucket, ptr);
+    if (new_size <= bucket->chunk_max_size)
+    {
+        bucket->chunks_tab[chunk_index].size = new_size;
+        return (bucket->chunks_tab[chunk_index].mem);
+    }
+    else
+    {
+        tmp = malloc(new_size);
+	    ft_memcpy(tmp, bucket->chunks_tab[chunk_index].mem,
+            bucket->chunks_tab[chunk_index].size);
+        free(ptr);
+        return (tmp);
+    }
+    return (NULL);
+}
+
+void				*realloc(void *ptr, size_t size)
+{
+    if (!ptr)
+        return (malloc(size));
+    if (!size)
+    {
+        free(ptr);
+        return (malloc(1));
+    }
+    return (realloc_chunk(ptr, size));
 }

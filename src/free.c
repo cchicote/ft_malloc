@@ -5,95 +5,86 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/07 16:14:07 by cchicote          #+#    #+#             */
-/*   Updated: 2018/11/07 16:14:15 by cchicote         ###   ########.fr       */
+/*   Created: 2018/12/13 16:25:44 by cchicote          #+#    #+#             */
+/*   Updated: 2018/12/13 16:25:54 by cchicote         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "malloc.h"
 
-void			refragment_bucket(t_bucket *b)
+void                free_chunk(t_bucket *bucket, size_t i)
 {
-	t_chunk		*c;
-
-	c = b->chunks;
-	while (c)
-	{
-		if (c->is_free && c->next && c->next->is_free &&
-			c->size + sizeof(t_chunk) + c->next->size <= b->chunk_max_size)
-		{
-			c->size += sizeof(t_chunk) + c->next->size;
-			c->next = c->next->next;
-		}
-		c = c->next;
-	}
+    bucket->chunks_tab[i].size = 0;
 }
 
-void			free_chunk(t_bucket *b, t_chunk *c)
+int                 retrieve_and_free_chunk(t_bucket *bucket, void *ptr)
 {
-	b->allocated -= c->size;
-	c->is_free = TRUE;
-	refragment_bucket(b);
+    size_t          i;
+
+    i = 0;
+    while (i < bucket->chunks)
+    {
+        if (bucket->chunks_tab[i].mem == ptr)
+        {
+            free_chunk(bucket, i);
+            return (TRUE);
+        }
+        i++;
+    }
+    return (FALSE);
 }
 
-t_bucket		*get_bucket(void *ptr, t_bucket *tab[3])
+void                retrieve_and_free_bucket(void *ptr)
 {
-	t_bucket	*b;
-	t_chunk		*c;
-	int			i;
+    t_bucket	    *tab[3];
+    t_bucket        *bucket;
+    t_bucket        *previous;
+    int             i;
 
-	i = -1;
-	while (++i < 3)
-	{
-		b = tab[i];
-		while (b)
-		{
-			c = b->chunks;
-			while (c)
-			{
-				if (c->mem == ptr)
-				{
-					free_chunk(b, c);
-					return (b);
-				}
-				c = c->next;
-			}
-			b = b->next;
-		}
-	}
-	return (NULL);
-}
-
-int				is_bucket_to_free(t_bucket *b)
-{
-	t_chunk	*tmp;
-
-	tmp = b->chunks;
-	while (tmp)
-	{
-		if (!tmp->is_free)
-			return (FALSE);
-		tmp = tmp->next;
-	}
-	b->is_free = TRUE;
-	if (b == g_saved_data.tiny || b == g_saved_data.small ||
-		b == g_saved_data.large)
-		return (FALSE);
-	return (TRUE);
-}
-
-void			free(void *ptr)
-{
-	t_bucket	*b;
-	t_bucket	*tab[3];
-
+    i = -1;
 	tab[0] = g_saved_data.tiny;
 	tab[1] = g_saved_data.small;
 	tab[2] = g_saved_data.large;
-	if (!ptr)
-		return ;
-	if (!(b = get_bucket(ptr, tab)))
-		return ;
-	if (is_bucket_to_free(b))
-		free_bucket(b);
+    while (++i < 3)
+    {
+        bucket = tab[i];
+        previous = NULL;
+        while (bucket)
+        {
+            if (retrieve_and_free_chunk(bucket, ptr))
+            {
+                free_bucket(bucket, previous);
+                return ;
+            }
+            previous = bucket;
+            bucket = bucket->next;
+        }
+    }
+    return ;
+}
+
+void                free_bucket(t_bucket *bucket, t_bucket *previous)
+{
+    size_t          i;
+
+    i = 0;
+    if (bucket == g_saved_data.tiny ||
+        bucket == g_saved_data.small || bucket == g_saved_data.large)
+        return ;
+    while (i < bucket->chunks)
+    {
+        if (bucket->chunks_tab[i].size)
+            return ;
+        i++;
+    }
+    previous->next = bucket->next;
+    munmap(bucket, bucket->size);
+}
+
+void				free(void *ptr)
+{   
+    if (!ptr)
+        return ;
+    retrieve_and_free_bucket(ptr);
+    return ;
 }

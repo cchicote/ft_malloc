@@ -1,82 +1,91 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   zones.c                                            :+:      :+:    :+:   */
+/*   buckets.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/15 20:03:15 by cchicote          #+#    #+#             */
-/*   Updated: 2018/11/15 20:03:22 by cchicote         ###   ########.fr       */
+/*   Created: 2018/12/13 17:02:11 by cchicote          #+#    #+#             */
+/*   Updated: 2018/12/13 17:02:16 by cchicote         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "malloc.h"
 
-t_global		g_saved_data;
+t_global		    g_saved_data;
 
-t_bucket		*retrieve_bucket(t_bucket *head, size_t size)
+t_bucket			**get_correct_head(size_t size)
 {
-	t_bucket *tmp;
-
-	tmp = head;
-	while (tmp && size > available(tmp))
-	{
-		tmp = tmp->next;
-	}
-	return (tmp);
+    if (size <= TINY)
+        return(&g_saved_data.tiny);
+    else
+        return(&g_saved_data.small);
 }
 
-void			free_bucket(t_bucket *b)
+t_bucket			*new_bucket(t_bucket **head, size_t size)
 {
-	t_bucket *tmp;
+    t_bucket		*new;
+    size_t			bucket_size;
+    size_t			chunk_max_size;
+	size_t			chunk_total_size;
 
-	tmp = NULL;
-	if (b->dimension == TINY)
-		tmp = g_saved_data.tiny;
-	else if (b->dimension == SMALL)
-		tmp = g_saved_data.small;
-	else if (b->dimension == LARGE)
-		tmp = g_saved_data.large;
-	while (tmp && tmp->next != b)
-		tmp = tmp->next;
-	tmp->next = b->next;
-	munmap(b, b->allocatable);
-}
-
-t_bucket		*new_bucket(t_bucket **head, int dimension, size_t chunk_size)
-{
-	t_bucket	*new;
-	size_t		bucket_size;
-
-	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size) * 100;
-	bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
-	new = (t_bucket*)mmap(NULL, bucket_size,
-			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-	new->dimension = dimension;
-	new->chunk_min_size = dimension == TINY ? 1 : TINY_MAX + 1;
-	new->chunk_max_size = dimension == TINY ? TINY_MAX : SMALL_MAX;
-	new->allocatable = bucket_size;
-	new->allocated = sizeof(t_bucket);
-	new->is_free = TRUE;
+    chunk_max_size = get_chunk_max_size(size);
+	chunk_total_size = chunk_max_size + sizeof(t_chunk) + 16;
+    bucket_size = sizeof(t_bucket) + 100 * chunk_total_size;
+    bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
+    new = (t_bucket*)mmap(NULL, bucket_size,
+		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (!new)
+        return (NULL);
+    new->size = bucket_size;
+	new->chunk_max_size = chunk_max_size;
+    new->chunks = (bucket_size - sizeof(t_bucket)) / chunk_total_size;
+    init_chunks(new, chunk_max_size);
+    new->next = NULL;
 	add_bucket_to_buckets(head, new);
-	return (new);
+    return (new);
 }
 
-t_bucket		*new_large_bucket(t_bucket **head, size_t chunk_size)
+t_bucket			*new_large_bucket(t_bucket **head, size_t size)
 {
-	t_bucket	*new;
-	size_t		bucket_size;
+	t_bucket		*new;
+    size_t			bucket_size;
+	size_t			chunk_total_size;
 
-	bucket_size = sizeof(t_bucket) + (sizeof(t_chunk) + chunk_size);
-	bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
-	new = (t_bucket*)mmap(NULL, bucket_size,
-			PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-	new->dimension = LARGE;
-	new->chunk_min_size = SMALL_MAX + 1;
-	new->chunk_max_size = chunk_size;
-	new->allocatable = bucket_size;
-	new->allocated = sizeof(t_bucket);
-	new->is_free = TRUE;
+	chunk_total_size = size + sizeof(t_chunk) + 16;
+    bucket_size = sizeof(t_bucket) + chunk_total_size;
+    bucket_size = (bucket_size / getpagesize() + 1) * getpagesize();
+    new = (t_bucket*)mmap(NULL, bucket_size,
+		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (!new)
+        return (NULL);
+    new->size = bucket_size;
+	new->chunk_max_size = size;
+    new->chunks = 1;
+    init_large_chunk(new);
+    new->next = NULL;
 	add_bucket_to_buckets(head, new);
-	return (new);
+    return (new);
+}
+
+t_bucket			*find_free_space(t_bucket **head, size_t size)
+{
+    t_bucket		*tmp;
+    
+    tmp = *head;
+    while (tmp)
+    {
+        if (find_free_chunk(tmp))
+            return (tmp);
+        tmp = tmp->next;
+    }
+    return (new_bucket(head, size));
+}
+
+t_bucket			*get_bucket(size_t size)
+{
+    t_bucket		**head;
+
+    head = get_correct_head(size);
+    return (find_free_space(head, size));
 }

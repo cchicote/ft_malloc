@@ -5,88 +5,51 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/07 16:12:24 by cchicote          #+#    #+#             */
-/*   Updated: 2018/11/07 16:12:26 by cchicote         ###   ########.fr       */
+/*   Created: 2018/12/13 16:25:10 by cchicote          #+#    #+#             */
+/*   Updated: 2018/12/13 16:25:16 by cchicote         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "malloc.h"
 
-t_chunk		*find_free_chunk(t_bucket *b, size_t size)
+void                *new_allocation(t_bucket *bucket, size_t size)
 {
-	t_chunk *tmp;
+    size_t          i;
 
-	tmp = b->chunks;
-	while (tmp)
-	{
-		if (tmp->size == size && tmp->is_free)
-			return (tmp);
-		tmp = tmp->next;
-	}
-	return (NULL);
+    i = 0;
+    while (i < bucket->chunks)
+    {
+        if (!bucket->chunks_tab[i].size)
+        {
+            bucket->chunks_tab[i].size = size;
+            return (bucket->chunks_tab[i].mem);
+        }
+        i++;
+    }
+    return (NULL);
 }
 
-t_chunk		*allocate_memory(void **b, size_t size)
+void                *new_large_allocation(t_bucket *bucket, size_t size)
 {
-	t_chunk		*chunk;
-	t_bucket	*bucket;
-
-	bucket = (t_bucket*)*b;
-	if ((chunk = find_free_chunk(bucket, size)))
-	{
-		bucket->allocated += sizeof(t_chunk) + size;
-		return (chunk);
-	}
-	chunk = (t_chunk*)(*b + bucket->allocated);
-	chunk->size = size;
-	chunk->is_free = FALSE;
-	chunk->mem = (void*)(*b + bucket->allocated + sizeof(t_chunk));
-	bucket->allocated += sizeof(t_chunk) + size;
-	bucket->is_free = FALSE;
-	chunk->next = NULL;
-	add_chunk_to_chunks(&bucket->chunks, chunk);
-	return (chunk);
+    if (!bucket->chunks_tab[0].size)
+    {
+        bucket->chunks_tab[0].size = size;
+        return (bucket->chunks_tab[0].mem);
+    }
+    return (NULL);
 }
 
-t_chunk		*allocate_large_memory(void **b, size_t size)
+void				*malloc(size_t size)
 {
-	t_chunk		*chunk;
-	t_bucket	*bucket;
+    t_bucket        *bucket;
 
-	bucket = (t_bucket*)*b;
-	if ((chunk = find_free_chunk(bucket, size)))
-	{
-		bucket->allocated += sizeof(t_chunk) + size;
-		return (chunk);
-	}
-	chunk = (t_chunk*)(*b + bucket->allocated);
-	chunk->size = size;
-	chunk->is_free = FALSE;
-	chunk->mem = (void*)(*b + bucket->allocated + sizeof(t_chunk));
-	bucket->allocated += sizeof(t_chunk) + size;
-	bucket->is_free = FALSE;
-	chunk->next = NULL;
-	add_chunk_to_chunks(&bucket->chunks, chunk);
-	return (chunk);
-}
-
-void		*malloc(size_t size)
-{
-	t_bucket *bucket;
-
-	bucket = NULL;
-	if (!size)
-		return (NULL);
-	if (size <= (size_t)TINY_MAX && !(bucket =
-		retrieve_bucket(g_saved_data.tiny, size)))
-		bucket = new_bucket(&(g_saved_data.tiny), TINY, TINY_MAX);
-	else if (size > (size_t)TINY_MAX && size <= (size_t)SMALL_MAX &&
-		!(bucket = retrieve_bucket(g_saved_data.small, size)))
-		bucket = new_bucket(&(g_saved_data.small), SMALL, SMALL_MAX);
-	else if (size > (size_t)SMALL_MAX)
-	{
-		bucket = new_large_bucket(&(g_saved_data.large), size);
-		return (allocate_large_memory((void**)&bucket, size)->mem);
-	}
-	return (allocate_memory((void**)&bucket, size)->mem);
+    if (!size)
+        return (NULL);
+    if (size > SMALL)
+    {
+        bucket = new_large_bucket(&g_saved_data.large, size);
+        return (new_large_allocation(bucket, size));
+    }
+    bucket = get_bucket(size);
+    return (new_allocation(bucket, size));
 }
