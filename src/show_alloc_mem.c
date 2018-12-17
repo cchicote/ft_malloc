@@ -12,7 +12,7 @@
 
 #include "malloc.h"
 
-void		print_address_hex(long num, int depth)
+void			print_address_hex(long num, int depth)
 {
 	if (depth == 0)
 	{
@@ -28,7 +28,7 @@ void		print_address_hex(long num, int depth)
 	write(1, &num, 1);
 }
 
-void		print_bucket_start(t_bucket *bucket, char *dim)
+void			print_bucket_start(t_bucket *bucket, char *dim)
 {
 	ft_putstr(dim);
 	ft_putstr(": ");
@@ -36,7 +36,7 @@ void		print_bucket_start(t_bucket *bucket, char *dim)
 	ft_putchar('\n');
 }
 
-size_t		print_chunk_data(t_chunk c)
+size_t			print_chunk_data(t_chunk c)
 {
 	print_address_hex((long)c.mem, 9);
 	ft_putstr(" - ");
@@ -44,23 +44,22 @@ size_t		print_chunk_data(t_chunk c)
 	ft_putstr(" : ");
 	ft_putnbr(c.size);
 	ft_putendl(" octets");
-    return (c.size);
+	return (c.size);
 }
 
-size_t		print_bucket(t_bucket *bucket, char *dim)
+size_t			print_bucket(t_bucket *bucket, char *dim)
 {
 	t_bucket	*b;
-    size_t      i;
+	size_t		i;
 	size_t		total;
 
 	b = bucket;
-    total = 0;
+	total = 0;
 	if (is_bucket_free(bucket))
 		return (0);
 	print_bucket_start(bucket, dim);
 	while (b)
 	{
-        //print_bucket_start(bucket, dim);
 		i = 0;
 		while (i < b->chunks)
 		{
@@ -73,7 +72,7 @@ size_t		print_bucket(t_bucket *bucket, char *dim)
 	return (total);
 }
 
-void		show_alloc_mem(void)
+void			show_alloc_mem(void)
 {
 	size_t total;
 

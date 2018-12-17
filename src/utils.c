@@ -12,21 +12,21 @@
 
 #include "malloc.h"
 
-int                 is_bucket_free(t_bucket *bucket)
+int					is_bucket_free(t_bucket *bucket)
 {
-    size_t          i;
+	size_t			i;
 
-    i = 0;
-    while (i < bucket->chunks)
-    {
-        if (bucket->chunks_tab[i].size > 0)
-            return (FALSE);
-        i++;
-    }
-    return (TRUE);
+	i = 0;
+	while (i < bucket->chunks)
+	{
+		if (bucket->chunks_tab[i].size > 0)
+			return (FALSE);
+		i++;
+	}
+	return (TRUE);
 }
 
-void			    add_bucket_to_buckets(t_bucket **head, t_bucket *bucket)
+void				add_bucket_to_buckets(t_bucket **head, t_bucket *bucket)
 {
 	t_bucket *tmp;
 
