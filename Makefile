@@ -49,7 +49,6 @@ $(LIBFT):
 	@ make -sC $(LIBFT_PATH)
 
 $(NAME): $(LIBFT) $(OBJ)
-	@ #$(CC) $(CFLAGS) -o $@ $(OBJ) -L $(LIBFT_PATH) $(LFLAGS)
 	@ $(CC) $(CFLAGS) -shared -o $@ $(OBJ) -L $(LIBFT_PATH) $(LFLAGS)
 	@ ln -sf $(NAME) $(LINK)
 	@ echo "Compiled"
