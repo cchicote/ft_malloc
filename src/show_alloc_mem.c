@@ -6,7 +6,7 @@
 /*   By: cchicote <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/13 16:26:32 by cchicote          #+#    #+#             */
-/*   Updated: 2018/12/13 16:26:38 by cchicote         ###   ########.fr       */
+/*   Updated: 2018/12/18 17:10:18 by cchicote         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ size_t			print_chunk_data(t_chunk c)
 {
 	print_address_hex((long)c.mem, 9);
 	ft_putstr(" - ");
-	print_address_hex((long)c.mem + c.size - sizeof(t_chunk), 9);
+	print_address_hex((long)c.mem + c.size, 9);
 	ft_putstr(" : ");
 	ft_putnbr(c.size);
 	ft_putendl(" octets");
